@@ -7,11 +7,13 @@ import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class JdbcTransferDao implements TransferDao{
 
     private JdbcTemplate jdbcTemplate;
@@ -36,10 +38,10 @@ public class JdbcTransferDao implements TransferDao{
     public List<Transfer> getTransfersByAccount(int id) {
         List<Transfer> transfers = new ArrayList<>();
         String sql = "SELECT transfer_id, account_id_send, account_id_receive, amount, pending FROM transfer " +
-                "WHERE account_id_send = (SELECT account_id FROM account WHERE user_id = ?) " +
-                "OR account_id_receive = (SELECT account_id FROM account WHERE user_id = ?); ";
+                "WHERE account_id_send IN (SELECT account_id FROM account WHERE user_id = ?) " +
+                "OR account_id_receive IN (SELECT account_id FROM account WHERE user_id = ?); ";
         try {
-            SqlRowSet results = jdbcTemplate.queryForRowSet(sql, id);
+            SqlRowSet results = jdbcTemplate.queryForRowSet(sql, id, id);
             while (results.next()) {
                 transfers.add(mapRowToTransfer(results));
             }
