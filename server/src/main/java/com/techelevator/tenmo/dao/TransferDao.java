@@ -6,10 +6,11 @@ import java.util.List;
 
 public interface TransferDao {
 
-    public Transfer sendTransfer();
-    public List<Transfer> getTransfers();
-    public List<Transfer> getPendingTransfers();
-    public Transfer requestTransfer();
-    public Transfer approveTransfer();
-    public boolean rejectTransfer();
+    public Transfer completeTransfer(Transfer transfer);
+    public List<Transfer> getTransfersByAccount(int userId);
+    public Transfer getTransferById(int transferId);
+    public List<Transfer> getPendingTransfersByAccount(int userId);
+    public Transfer createTransfer(Transfer transfer);
+    public boolean approveTransferRequest(Transfer transfer);
+    public boolean rejectTransferRequest(int transferId);
 }

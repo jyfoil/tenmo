@@ -8,7 +8,7 @@ public class Transfer {
     private int accountIdSending;
     private int accountIdReceiving;
     private BigDecimal amount;
-    private boolean pendingStatus;
+    private boolean pending;
 
     public int getTransferId() {
         return transferId;
@@ -42,12 +42,12 @@ public class Transfer {
         this.amount = amount;
     }
 
-    public boolean isPendingStatus() {
-        return pendingStatus;
+    public boolean isPending() {
+        return pending;
     }
 
-    public void setPendingStatus(boolean pendingStatus) {
-        this.pendingStatus = pendingStatus;
+    public void setPending(boolean pendingStatus) {
+        this.pending = pendingStatus;
     }
 
     public String toString() {

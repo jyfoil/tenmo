@@ -44,7 +44,7 @@ CREATE TABLE transfer (
     account_id_send int NOT NULL,
     account_id_receive int NOT NULL,
     amount numeric(13,2) NOT NULL,
-    pending boolean,
+    pending boolean DEFAULT true,
     CONSTRAINT PK_transfer PRIMARY KEY (transfer_id),
     CONSTRAINT FK_account_send FOREIGN KEY (account_id_send) REFERENCES account (account_id),
     CONSTRAINT FK_account_receive FOREIGN KEY (account_id_receive) REFERENCES account (account_id)
