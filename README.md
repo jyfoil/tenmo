@@ -16,10 +16,10 @@ You should attempt to complete all of the following required use cases.
    1. Logging in returns an Authentication Token. I need to include this token with all my subsequent interactions with the system outside of registering and logging in.
    2. The ability to log in has been provided in your starter code.
    3. User ids start at 1001.
-3. As a user, when I register a new account is created for me.
+3. **[COMPLETE]** As a user, when I register a new account is created for me.
    1. The new account has an initial balance of $1000.
    2. Account ids start at 2001.
-4. As an authenticated user of the system, I need to be able to see my Account Balance.
+4. **[COMPLETE]** As an authenticated user of the system, I need to be able to see my Account Balance.
 5. As an authenticated user of the system, I need to be able to *send* a transfer of a specific amount of TE Bucks to a registered user.
    1. I should be able to choose from a list of users to send TE Bucks to.
    2. I must not be allowed to send money to myself.
@@ -52,7 +52,7 @@ Validate all of the API's endpoints using Postman.  *No sensitive information (i
    10. If the transfer is approved, the requester's account balance is increased by the amount of the request.
    11. If the transfer is approved, the requestee's account balance is decreased by the amount of the request.
    12. If the transfer is rejected, no account balance changes.
-   13. A single TEnmo user may choose to have multiple accounts associated with them (this will make the database relationship a one-to many relationship).
+   13. **[COMPLETE]** A single TEnmo user may choose to have multiple accounts associated with them (this will make the database relationship a one-to many relationship).
 
 ### Bonus Challenge
 

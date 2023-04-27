@@ -47,15 +47,15 @@ public class JdbcAccountDao implements AccountDao {
     }
 
     @Override
-    public Account getAccount(int id) {
+    public Account getAccount(int userId, int accountId) {
         Account account = null;
 
         String sql = "SELECT account_id, user_id, balance " +
                      "FROM account " +
-                     "WHERE account_id = ?;";
+                     "WHERE user_id = ? AND account_id = ?;";
 
         try {
-            SqlRowSet result = jdbcTemplate.queryForRowSet(sql, id);
+            SqlRowSet result = jdbcTemplate.queryForRowSet(sql,userId, accountId);
 
             if (result.next()) {
                 account = mapRowToAccount(result);
@@ -90,7 +90,7 @@ public class JdbcAccountDao implements AccountDao {
             throw new DaoException("Data Integrity violation", e);
         }
 
-        createdAccount = getAccount(newAccountId);
+        createdAccount = getAccount(account.getUserId(), newAccountId);
 
 
         return createdAccount;

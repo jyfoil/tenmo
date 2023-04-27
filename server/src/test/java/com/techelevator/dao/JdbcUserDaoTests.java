@@ -1,6 +1,8 @@
 package com.techelevator.dao;
 
 
+import com.techelevator.tenmo.dao.AccountDao;
+import com.techelevator.tenmo.dao.JdbcAccountDao;
 import com.techelevator.tenmo.dao.JdbcUserDao;
 import com.techelevator.tenmo.model.User;
 import org.junit.Assert;
@@ -17,7 +19,8 @@ public class JdbcUserDaoTests extends BaseDaoTests{
     @Before
     public void setup() {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-        sut = new JdbcUserDao(jdbcTemplate);
+        AccountDao accountDao = new JdbcAccountDao(dataSource);
+        sut = new JdbcUserDao(jdbcTemplate, accountDao);
     }
 
     @Test

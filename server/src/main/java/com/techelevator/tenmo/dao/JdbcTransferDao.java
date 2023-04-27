@@ -24,20 +24,23 @@ public class JdbcTransferDao implements TransferDao{
 
     //Creates and completes a transfer as the sender
     @Override
-    public Transfer completeTransfer(Transfer transfer) {
-       Transfer completedTransfer = createTransfer(transfer);
-        if (approveTransferRequest(completedTransfer)) {
-            return completedTransfer;
+    public Transfer sendTransfer(Transfer transfer) {
+       Transfer sentTransfer = createTransfer(transfer);
+        if (approveTransferRequest(sentTransfer)) {
+            return sentTransfer;
         } else {
             throw new DaoException("Transfer not completed");
         }
     }
 
     //gets all accounts the logged in user has and their balances
+    //TODO: change method so that usernames display instead of account ids
     @Override
     public List<Transfer> getTransfersByAccount(int id) {
         List<Transfer> transfers = new ArrayList<>();
         String sql = "SELECT transfer_id, account_id_send, account_id_receive, amount, pending FROM transfer " +
+                "JOIN account ON transfer WHERE transfer.account_id_send = account.account_id " +
+                "JOIN tenmo_user ON account WHERE account.user_id = tenmo_user.user_id " +
                 "WHERE account_id_send IN (SELECT account_id FROM account WHERE user_id = ?) " +
                 "OR account_id_receive IN (SELECT account_id FROM account WHERE user_id = ?); ";
         try {
@@ -74,12 +77,12 @@ public class JdbcTransferDao implements TransferDao{
 
     //gets all pending transfers that a logged in user has
     @Override
-    public List<Transfer> getPendingTransfersByAccount(int id) {
+    public List<Transfer> getPendingTransfersByAccount(int id, boolean pending) {
         List<Transfer> transfers = new ArrayList<>();
         String sql = "SELECT transfer_id, account_id_send, account_id_receive, amount, pending FROM transfer " +
-                "WHERE account_id_send = (SELECT account_id FROM account WHERE user_id = ?) AND pending = true;";
+                "WHERE account_id_send = (SELECT account_id FROM account WHERE user_id = ?) AND pending = ?;";
         try {
-            SqlRowSet results = jdbcTemplate.queryForRowSet(sql, id);
+            SqlRowSet results = jdbcTemplate.queryForRowSet(sql, id, pending);
             while (results.next()) {
                 transfers.add(mapRowToTransfer(results));
             }
@@ -98,7 +101,7 @@ public class JdbcTransferDao implements TransferDao{
         String sql = "INSERT INTO transfer (account_id_send, account_id_receive, amount, pending) " +
                     "VALUES (?, ?, ?, ?) RETURNING transfer_id";
         try {
-            int newTransferId = jdbcTemplate.queryForObject(sql, int.class, transfer.getAccountIdSending(), transfer.getAccountIdReceiving(),
+            Integer newTransferId = jdbcTemplate.queryForObject(sql, Integer.class, transfer.getAccountIdSending(), transfer.getAccountIdReceiving(),
                     transfer.getAmount(), transfer.isPending());
             requestedTransfer = getTransferById(newTransferId);
         } catch (CannotGetJdbcConnectionException e) {
