@@ -1,6 +1,8 @@
 package com.techelevator.tenmo.dao;
 
 import com.techelevator.tenmo.model.Transfer;
+import com.techelevator.tenmo.model.TransferRequestDTO;
+import com.techelevator.tenmo.model.User;
 import exceptions.DaoException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.BadSqlGrammarException;
@@ -17,9 +19,11 @@ import java.util.List;
 public class JdbcTransferDao implements TransferDao{
 
     private JdbcTemplate jdbcTemplate;
+    private UserDao userDao;
 
-    public JdbcTransferDao(DataSource dataSource) {
+    public JdbcTransferDao(DataSource dataSource, UserDao userDao) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.userDao = userDao;
     }
 
     //Creates and completes a transfer as the sender
@@ -36,11 +40,9 @@ public class JdbcTransferDao implements TransferDao{
     //gets all accounts the logged in user has and their balances
     //TODO: change method so that usernames display instead of account ids
     @Override
-    public List<Transfer> getTransfersByAccount(int id) {
+    public List<Transfer> getTransfersByUser(int id) {
         List<Transfer> transfers = new ArrayList<>();
         String sql = "SELECT transfer_id, account_id_send, account_id_receive, amount, pending FROM transfer " +
-                "JOIN account ON transfer WHERE transfer.account_id_send = account.account_id " +
-                "JOIN tenmo_user ON account WHERE account.user_id = tenmo_user.user_id " +
                 "WHERE account_id_send IN (SELECT account_id FROM account WHERE user_id = ?) " +
                 "OR account_id_receive IN (SELECT account_id FROM account WHERE user_id = ?); ";
         try {
@@ -167,5 +169,13 @@ public class JdbcTransferDao implements TransferDao{
         transfer.setAmount(rowSet.getBigDecimal("amount"));
         transfer.setPending(rowSet.getBoolean("pending"));
         return transfer;
+    }
+
+    public TransferRequestDTO mapTransferToTransferDTO(Transfer transfer) {
+        TransferRequestDTO transferDTO = new TransferRequestDTO();
+        transferDTO.setAmount(transfer.getAmount());
+        transferDTO.setUserSending(userDao.getUsernameByAccountId(transfer.getAccountIdSending()));
+        transferDTO.setUserReceiving(userDao.getUsernameByAccountId(transfer.getAccountIdReceiving()));
+        return transferDTO;
     }
 }

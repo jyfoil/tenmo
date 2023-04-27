@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import javax.sql.RowSet;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +35,14 @@ public class JdbcUserDao implements UserDao {
             return -1;
         }
     }
+
+    public String findUsernameById(int id) {
+        String sql = "SELECT username FROM tenmo_user WHERE user_id = ?;";
+
+        String username = jdbcTemplate.queryForObject(sql, String.class, id);
+        return username;
+    }
+
 
     @Override
     public List<User> findAll() {
@@ -74,6 +83,23 @@ public class JdbcUserDao implements UserDao {
         accountDao.createAccount(account);
 
         return true;
+    }
+
+    public String getUsernameByAccountId(int id) {
+        User user = null;
+        String username = "";
+
+        String sql = "SELECT user_id, username, password_hash FROM tenmo_user " +
+                     "WHERE user_id IN (SELECT user_id FROM account WHERE account_id = ?)";
+
+        SqlRowSet results = jdbcTemplate.queryForRowSet(sql, id);
+
+        if (results.next()) {
+            user = mapRowToUser(results);
+        }
+
+        username = user.getUsername();
+        return username;
     }
 
     private User mapRowToUser(SqlRowSet rs) {

@@ -1,15 +1,18 @@
 package com.techelevator.tenmo.controller;
 
 import com.techelevator.tenmo.dao.AccountDao;
+import com.techelevator.tenmo.dao.JdbcUserDao;
 import com.techelevator.tenmo.dao.TransferDao;
 import com.techelevator.tenmo.dao.UserDao;
 import com.techelevator.tenmo.model.Account;
 import com.techelevator.tenmo.model.Transfer;
+import com.techelevator.tenmo.model.TransferRequestDTO;
 import com.techelevator.tenmo.model.User;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -43,23 +46,35 @@ public class AccountController {
     public Transfer sendTransfer(Principal principal, @RequestBody Transfer transfer){
         return transferDao.sendTransfer(transfer);
     }
-//
-//    @RequestMapping(path = "/{username}", method = RequestMethod.POST)
-//    public Account createAccount(@PathVariable String username,
-//                                 @RequestBody Account account) {
-//        return accountDao.createAccount(account);
-//    }
 
-    @RequestMapping(path = "/transfer/all", method = RequestMethod.GET)
-    public List<Transfer> getTransfersByAccount(Principal principal) {
-        int idFromUsername = userDao.findIdByUsername(principal.getName());
-        return transferDao.getTransfersByAccount(idFromUsername);
+    @RequestMapping(path = "/account", method = RequestMethod.POST)
+    public Account createAccount(Principal principal, @RequestBody Account account) {
+        // We want to get the username thats associated with this account
+        if (!principal.getName().equals(userDao.findUsernameById(account.getUserId()))) {
+            return null;
+        }
+        return accountDao.createAccount(account);
     }
 
-//    @RequestMapping(path = "/transfer/{username}/{id}", method = RequestMethod.GET)
-//    public Transfer getTransferById(@PathVariable String username, @PathVariable int id) {
-//        return transferDao.getTransferById(id);
-//    }
+    @RequestMapping(path = "/transfer/all", method = RequestMethod.GET)
+    public List<TransferRequestDTO> getTransfersByAccount(Principal principal) {
+        int idFromUsername = userDao.findIdByUsername(principal.getName());
+        List<Transfer> transfers = transferDao.getTransfersByUser(idFromUsername);
+        List<TransferRequestDTO> transferRequests = new ArrayList<>();
+        for (Transfer eachTransfer : transfers) {
+            transferRequests.add(transferDao.mapTransferToTransferDTO(eachTransfer));
+        }
+
+        return transferRequests;
+    }
+
+    @RequestMapping(path = "/transfer/{id}", method = RequestMethod.GET)
+    public TransferRequestDTO getTransferById(@PathVariable int id) {
+        Transfer transfer = transferDao.getTransferById(id);
+        TransferRequestDTO transferRequest = new TransferRequestDTO();
+        transferRequest = transferDao.mapTransferToTransferDTO(transfer);
+        return transferRequest;
+    }
 
     //TODO: replace working method paths with endpoints that don't include user info
 
