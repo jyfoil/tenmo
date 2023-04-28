@@ -4,6 +4,7 @@ import com.techelevator.tenmo.dao.AccountDao;
 import com.techelevator.tenmo.dao.TransferDao;
 import com.techelevator.tenmo.dao.UserDao;
 import com.techelevator.tenmo.model.Account;
+import exceptions.AccountException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,10 +38,10 @@ public class AccountController {
     public Account createAccount(Principal principal, @RequestBody Account account) {
         // We want to get the username that's associated with this account
         if (!principal.getName().equals(userDao.findUsernameById(account.getUserId()))) {
-            return null;
+            throw new AccountException("Cannot create account for a different user");
         }
         if (account.isPrimaryAccount()){
-            return null;
+            throw new AccountException("Cannot create a second primary account");
         }
         return accountDao.createAccount(account);
     }

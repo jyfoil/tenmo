@@ -186,6 +186,16 @@ public class JdbcTransferDao implements TransferDao{
         return transfer;
     }
 
+    public Transfer mapTransferDTOToTransfer(TransferDTO transferDTO, int id) {
+        Transfer transfer = new Transfer();
+        transfer.setTransferId(id);
+        transfer.setAccountIdReceiving(getPrimaryAccountIDFromUsername(transferDTO.getUserReceiving()));
+        transfer.setAccountIdSending(getPrimaryAccountIDFromUsername(transferDTO.getUserSending()));
+        transfer.setAmount(transferDTO.getAmount());
+        transfer.setPending(false);
+        return transfer;
+    }
+
     public int getPrimaryAccountIDFromUsername(String username){
         int accountId = 0;
         String sql = "SELECT account_id FROM account WHERE primary_account = true AND user_id = ?";
@@ -202,7 +212,8 @@ public class JdbcTransferDao implements TransferDao{
         return accountId;
     }
 
-    private boolean updateStatus(Transfer transfer){
+    //changed to public since transferController needs it
+    public boolean updateStatus(Transfer transfer){
         boolean updated = false;
         String sql = "UPDATE transfer SET pending = false WHERE transfer_id = ?";
         try {

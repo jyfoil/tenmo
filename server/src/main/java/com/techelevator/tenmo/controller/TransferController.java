@@ -8,6 +8,7 @@ import com.techelevator.tenmo.model.TransferDTO;
 import com.techelevator.tenmo.model.User;
 import com.techelevator.tenmo.model.UserInfoDTO;
 import exceptions.DaoException;
+import exceptions.TransferException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -73,7 +74,7 @@ public class TransferController {
     @RequestMapping(path = "/transfer/send", method = RequestMethod.POST)
     public Transfer sendTransfer(Principal principal, @RequestBody TransferDTO sendDTO){
         if (!sendDTO.getUserSending().equals(principal.getName())){
-           throw new DaoException("Hey, you can't send money on behalf of someone else!");
+           throw new TransferException("Hey, you can't send money on behalf of someone else!");
         }
         Transfer transfer = transferDao.mapTransferDTOToTransfer(sendDTO);
         return transferDao.sendTransfer(transfer);
@@ -83,9 +84,23 @@ public class TransferController {
     @RequestMapping(path = "/transfer/request", method = RequestMethod.POST)
     public Transfer requestTransfer(Principal principal, @RequestBody TransferDTO requestDTO){
         if (!requestDTO.getUserReceiving().equals(principal.getName())){
-            throw new DaoException("Hey, you can't do that!");
+            throw new TransferException("Hey, you can't do that!");
         }
         Transfer transfer = transferDao.mapTransferDTOToTransfer(requestDTO);
         return transferDao.createTransfer(transfer);
+    }
+
+    //NEW SINCE COMMIT
+    @RequestMapping(path = "/transfer/{id}", method = RequestMethod.PUT)
+    public TransferDTO approveTransfer(Principal principal, @PathVariable int id){
+        if (!getTransferById(id).getUserSending().equals(principal.getName())){
+            throw new TransferException("Cannot approve transfer on behalf of another user");
+        }
+        Transfer transfer = transferDao.mapTransferDTOToTransfer(getTransferById(id), id);
+        if (!transferDao.approveTransferRequest(transfer)){
+            throw new TransferException("Transfer was not approved");
+        }
+        transferDao.updateStatus(transfer);
+        return transferDao.mapTransferToTransferDTO(transfer);
     }
 }

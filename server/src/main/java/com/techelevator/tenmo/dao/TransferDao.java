@@ -16,4 +16,6 @@ public interface TransferDao {
     public boolean rejectTransferRequest(int transferId);
     public TransferDTO mapTransferToTransferDTO(Transfer transfer);
     public Transfer mapTransferDTOToTransfer(TransferDTO transferDTO);
+    public Transfer mapTransferDTOToTransfer(TransferDTO transferDTO, int id);
+    public boolean updateStatus(Transfer transfer);
 }
