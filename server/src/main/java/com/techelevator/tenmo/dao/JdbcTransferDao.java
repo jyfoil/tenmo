@@ -1,8 +1,7 @@
 package com.techelevator.tenmo.dao;
 
 import com.techelevator.tenmo.model.Transfer;
-import com.techelevator.tenmo.model.TransferRequestDTO;
-import com.techelevator.tenmo.model.User;
+import com.techelevator.tenmo.model.TransferDTO;
 import exceptions.DaoException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.BadSqlGrammarException;
@@ -26,11 +25,12 @@ public class JdbcTransferDao implements TransferDao{
         this.userDao = userDao;
     }
 
-    //Creates and completes a transfer as the sender
+//    Creates and completes a transfer as the sender
     @Override
     public Transfer sendTransfer(Transfer transfer) {
        Transfer sentTransfer = createTransfer(transfer);
         if (approveTransferRequest(sentTransfer)) {
+            updateStatus(sentTransfer);
             return sentTransfer;
         } else {
             throw new DaoException("Transfer not completed");
@@ -38,7 +38,6 @@ public class JdbcTransferDao implements TransferDao{
     }
 
     //gets all accounts the logged in user has and their balances
-    //TODO: change method so that usernames display instead of account ids
     @Override
     public List<Transfer> getTransfersByUser(int id) {
         List<Transfer> transfers = new ArrayList<>();
@@ -79,12 +78,13 @@ public class JdbcTransferDao implements TransferDao{
 
     //gets all pending transfers that a logged in user has
     @Override
-    public List<Transfer> getPendingTransfersByAccount(int id, boolean pending) {
+    public List<Transfer> getPendingTransfersByAccount(int id) {
         List<Transfer> transfers = new ArrayList<>();
         String sql = "SELECT transfer_id, account_id_send, account_id_receive, amount, pending FROM transfer " +
-                "WHERE account_id_send = (SELECT account_id FROM account WHERE user_id = ?) AND pending = ?;";
+                "WHERE (pending = true AND (account_id_send = (SELECT account_id FROM account WHERE user_id = ?))) " +
+                "OR (pending = true AND (account_id_receive = (SELECT account_id FROM account WHERE user_id = ?)));";
         try {
-            SqlRowSet results = jdbcTemplate.queryForRowSet(sql, id, pending);
+            SqlRowSet results = jdbcTemplate.queryForRowSet(sql, id, id);
             while (results.next()) {
                 transfers.add(mapRowToTransfer(results));
             }
@@ -120,17 +120,12 @@ public class JdbcTransferDao implements TransferDao{
     @Override
     public boolean approveTransferRequest(Transfer transfer) {
         boolean approved = false;
-        String sql = "BEGIN TRANSACTION; UPDATE account SET balance = balance - ? WHERE account_id = ? " +
-                "UPDATE account SET balance = balance + ? WHERE account_id = ? COMMIT;";
+        String sql = "BEGIN TRANSACTION; UPDATE account SET balance = balance - ? WHERE account_id = ?; " +
+                "UPDATE account SET balance = balance + ? WHERE account_id = ?; COMMIT;";
         try {
-            int numberOfRows = jdbcTemplate.update(sql, transfer.getAmount(), transfer.getAccountIdSending(),
+            jdbcTemplate.update(sql, transfer.getAmount(), transfer.getAccountIdSending(),
                     transfer.getAmount(), transfer.getAccountIdReceiving());
-            if (numberOfRows != 2){
-                throw new DaoException("Expected exactly 2 rows");
-            } else {
-                transfer.setPending(false);
-                approved = true;
-            }
+            approved = true;
         } catch (CannotGetJdbcConnectionException e) {
             throw new DaoException("Cannot connect to database", e);
         } catch (BadSqlGrammarException e) {
@@ -138,7 +133,7 @@ public class JdbcTransferDao implements TransferDao{
         } catch (DataIntegrityViolationException e) {
             throw new DaoException("Data Integrity violation", e);
         }
-        return approved;
+       return approved;
     }
 
     //rejects a transfer as the sender and deletes transaction from records
@@ -171,11 +166,59 @@ public class JdbcTransferDao implements TransferDao{
         return transfer;
     }
 
-    public TransferRequestDTO mapTransferToTransferDTO(Transfer transfer) {
-        TransferRequestDTO transferDTO = new TransferRequestDTO();
+    @Override
+    public TransferDTO mapTransferToTransferDTO(Transfer transfer) {
+        TransferDTO transferDTO = new TransferDTO();
         transferDTO.setAmount(transfer.getAmount());
         transferDTO.setUserSending(userDao.getUsernameByAccountId(transfer.getAccountIdSending()));
         transferDTO.setUserReceiving(userDao.getUsernameByAccountId(transfer.getAccountIdReceiving()));
+        transferDTO.setStatus(transfer.isPending() ? "Pending" : "Approved");
         return transferDTO;
+    }
+
+    @Override
+    public Transfer mapTransferDTOToTransfer(TransferDTO transferDTO) {
+        Transfer transfer = new Transfer();
+        transfer.setAccountIdReceiving(getPrimaryAccountIDFromUsername(transferDTO.getUserReceiving()));
+        transfer.setAccountIdSending(getPrimaryAccountIDFromUsername(transferDTO.getUserSending()));
+        transfer.setAmount(transferDTO.getAmount());
+        transfer.setPending(true);
+        return transfer;
+    }
+
+    public int getPrimaryAccountIDFromUsername(String username){
+        int accountId = 0;
+        String sql = "SELECT account_id FROM account WHERE primary_account = true AND user_id = ?";
+        try {
+        SqlRowSet result = jdbcTemplate.queryForRowSet(sql, userDao.findIdByUsername(username));
+        if (result.next()){
+            accountId = result.getInt("account_id");
+        }
+        } catch (CannotGetJdbcConnectionException e) {
+            throw new DaoException("Cannot connect to database", e);
+        } catch (BadSqlGrammarException e) {
+            throw new DaoException("Sql Syntax error", e);
+        }
+        return accountId;
+    }
+
+    private boolean updateStatus(Transfer transfer){
+        boolean updated = false;
+        String sql = "UPDATE transfer SET pending = false WHERE transfer_id = ?";
+        try {
+            int numberOfRows = jdbcTemplate.update(sql, transfer.getTransferId());
+            if (numberOfRows > 0){
+                updated = true;
+            } else {
+                throw new DaoException("Transfer status not updated");
+            }
+        } catch (CannotGetJdbcConnectionException e) {
+            throw new DaoException("Cannot connect to database", e);
+        } catch (BadSqlGrammarException e) {
+            throw new DaoException("Sql Syntax error", e);
+        } catch (DataIntegrityViolationException e) {
+            throw new DaoException("Data Integrity violation", e);
+        }
+        return updated;
     }
 }

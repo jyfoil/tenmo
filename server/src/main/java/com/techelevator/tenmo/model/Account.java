@@ -11,14 +11,17 @@ public class Account {
     @JsonProperty("user_id")
     private int userId;
     private BigDecimal balance;
+    @JsonProperty("primary_account")
+    private boolean primaryAccount;
 
     public Account (){
 
     }
 
-    public Account (int id, BigDecimal balance) {
+    public Account (int id, BigDecimal balance, boolean primaryAccount) {
         this.userId = id;
         this.balance = balance;
+        this.primaryAccount = primaryAccount;
     }
 
     public int getAccountId() {
@@ -47,5 +50,13 @@ public class Account {
 
     public String toString() {
         return "Account has " + balance;
+    }
+
+    public boolean isPrimaryAccount() {
+        return primaryAccount;
+    }
+
+    public void setPrimaryAccount(boolean primaryAccount) {
+        this.primaryAccount = primaryAccount;
     }
 }

@@ -2,6 +2,7 @@ package com.techelevator.tenmo.dao;
 
 import com.techelevator.tenmo.model.Account;
 import com.techelevator.tenmo.model.User;
+import com.techelevator.tenmo.model.UserInfoDTO;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -79,7 +80,7 @@ public class JdbcUserDao implements UserDao {
             return false;
         }
         BigDecimal balance = new BigDecimal("1000.00");
-        Account account = new Account(newUserId, balance);
+        Account account = new Account(newUserId, balance, true);
         accountDao.createAccount(account);
 
         return true;
@@ -110,5 +111,11 @@ public class JdbcUserDao implements UserDao {
         user.setActivated(true);
         user.setAuthorities("USER");
         return user;
+    }
+
+    public UserInfoDTO mapUserToUserInfoDTO(User user){
+        UserInfoDTO userInfoDTO = new UserInfoDTO();
+        userInfoDTO.setUsername(user.getUsername());
+        return userInfoDTO;
     }
 }

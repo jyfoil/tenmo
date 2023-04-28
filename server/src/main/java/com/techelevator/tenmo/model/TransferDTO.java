@@ -4,20 +4,24 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.math.BigDecimal;
 
-public class TransferRequestDTO {
+public class TransferDTO {
 
+    @JsonProperty("user_sending")
     private String userSending;
+    @JsonProperty("user_receiving")
     private String userReceiving;
     private BigDecimal amount;
+    private String status;
 
-    public TransferRequestDTO() {
+    public TransferDTO() {
 
     }
 
-    public TransferRequestDTO(String userSending, String userReceiving, BigDecimal amount) {
+    public TransferDTO(String userSending, String userReceiving, BigDecimal amount) {
         this.userSending = userSending;
         this.userReceiving = userReceiving;
         this.amount = amount;
+        this.status = "Pending";
     }
 
     public String getUserSending() {
@@ -42,5 +46,13 @@ public class TransferRequestDTO {
 
     public void setAmount(BigDecimal amount) {
         this.amount = amount;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

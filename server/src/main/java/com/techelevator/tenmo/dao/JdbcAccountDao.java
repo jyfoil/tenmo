@@ -50,7 +50,7 @@ public class JdbcAccountDao implements AccountDao {
     public Account getAccount(int userId, int accountId) {
         Account account = null;
 
-        String sql = "SELECT account_id, user_id, balance " +
+        String sql = "SELECT account_id, user_id, balance, primary_account " +
                      "FROM account " +
                      "WHERE user_id = ? AND account_id = ?;";
 
@@ -74,13 +74,13 @@ public class JdbcAccountDao implements AccountDao {
     public Account createAccount(Account account) {
         Account createdAccount = null;
 
-        String sql = "INSERT into account (user_id, balance) " +
-                     "VALUES (?, ?) RETURNING account_id;";
+        String sql = "INSERT into account (user_id, balance, primary_account) " +
+                     "VALUES (?, ?, ?) RETURNING account_id;";
 
         int newAccountId = 0;
         
         try {
-            newAccountId = jdbcTemplate.queryForObject(sql, int.class, account.getUserId(), account.getBalance());
+            newAccountId = jdbcTemplate.queryForObject(sql, int.class, account.getUserId(), account.getBalance(), account.isPrimaryAccount());
 
         } catch (CannotGetJdbcConnectionException e) {
             throw new DaoException("Cannot connect to database", e);
@@ -102,6 +102,7 @@ public class JdbcAccountDao implements AccountDao {
         account.setAccountId(rowSet.getInt("account_id"));
         account.setUserId(rowSet.getInt("user_id"));
         account.setBalance(rowSet.getBigDecimal("balance"));
+        account.setPrimaryAccount(rowSet.getBoolean("primary_account"));
         return account;
     }
 }
