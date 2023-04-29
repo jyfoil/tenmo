@@ -64,7 +64,7 @@ VALUES
 (1002, 500, false), -- 2003
 (1003, 2000, true); -- 2004
 
-INSERT INTO transaction (account_id_send, account_id_receive, amount, pending)
+INSERT INTO transfer (account_id_send, account_id_receive, amount, pending)
 VALUES
 (2001, 2002, 200, false), -- 3001
 (2002, 2001, 400, true), -- 3002
