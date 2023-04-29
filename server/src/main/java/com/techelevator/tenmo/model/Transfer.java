@@ -15,6 +15,17 @@ public class Transfer {
     private BigDecimal amount;
     private boolean pending;
 
+    public Transfer() {
+
+    }
+
+    public Transfer(int accountIdSending, int accountIdReceiving, BigDecimal amount, boolean pending) {
+        this.accountIdSending = accountIdSending;
+        this.accountIdReceiving = accountIdReceiving;
+        this.amount = amount;
+        this.pending = pending;
+    }
+
     public int getTransferId() {
         return transferId;
     }

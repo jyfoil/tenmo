@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -19,6 +20,10 @@ public class JdbcTransferDaoTest extends BaseDaoTests {
 
     private JdbcTransferDao sut;
     private JdbcUserDao userDao;
+    private static final Transfer TRANSFER_1 = new Transfer(2001, 2002, new BigDecimal("200.00"), false);
+    private static final Transfer TRANSFER_2 = new Transfer(2002, 2001, new BigDecimal("400.00"), true);
+    private static final Transfer TRANSFER_3 = new Transfer(2004, 2002, new BigDecimal("500.00"), false);
+    private static final Transfer TRANSFER_4 = new Transfer(2001, 2004, new BigDecimal("100.00"), true);
 
     @Before
     public void setup() {
@@ -29,23 +34,44 @@ public class JdbcTransferDaoTest extends BaseDaoTests {
 
     @Test
     public void sendTransfer() {
+        Transfer createdTransfer = sut.sendTransfer(TRANSFER_1);
+        int transferId = createdTransfer.getTransferId();
+        Transfer retrievedTransfer = sut.getTransferById(transferId);
+
+        Assert.assertTrue(transferId >= 3001);
+        assertTransfersMatch(createdTransfer, retrievedTransfer);
     }
 
     @Test
-    public void getTransfersByUser() {
+    public void getTransfersByUser_return_all_users_transfers() {
+        List<Transfer> transfers = sut.getTransfersByUser(1001);
+        Assert.assertEquals(3, transfers.size());
+
+        assertTransfersMatch(TRANSFER_1, transfers.get(0));
+        assertTransfersMatch(TRANSFER_2, transfers.get(1));
+        assertTransfersMatch(TRANSFER_4, transfers.get(2));
     }
 
     @Test
-    public void getTransferById() {
+    public void getTransferById_returns_specfic_transfer() {
+        Transfer transfer = sut.getTransferById(3004);
+        Transfer transfer2 = sut.getTransferById(3002);
+        Transfer transfer3 = sut.getTransferById(3003);
+
+        assertTransfersMatch(TRANSFER_4, transfer);
+        assertTransfersMatch(TRANSFER_2, transfer2);
+        assertTransfersMatch(TRANSFER_3, transfer3);
     }
 
     @Test
     public void getPendingTransfersByAccount() {
+        List<Transfer> transfers = sut.getPendingTransfersByAccount(1001);
+        Assert.assertEquals(2, transfers.size());
+
+        assertTransfersMatch(TRANSFER_2, transfers.get(0));
+        assertTransfersMatch(TRANSFER_4, transfers.get(1));
     }
 
-    // Ava
-
-    //passes!
     @Test
     public void createTransfer_returns_id_and_expected_values() {
         BigDecimal amount = new BigDecimal("100.50");
@@ -66,7 +92,6 @@ public class JdbcTransferDaoTest extends BaseDaoTests {
         Assert.assertEquals(createdTransfer.isPending(), retrievedTransfer.isPending());
     }
 
-    //passes!
     @Test
     public void approveTransfer_updates_balances() {
         BigDecimal amount = new BigDecimal("100.50");
@@ -88,7 +113,6 @@ public class JdbcTransferDaoTest extends BaseDaoTests {
         Assert.assertEquals(userBalanceAfter, userBalanceBefore.add(testTransfer.getAmount()));
     }
 
-    //passes!
     @Test
     public void rejected_transfer_cannot_be_retrieved() {
         sut.rejectTransferRequest(3002);
@@ -96,7 +120,6 @@ public class JdbcTransferDaoTest extends BaseDaoTests {
         Assert.assertNull(retrievedTransfer);
     }
 
-    //fix with deep equals
     @Test
     public void mapTransferToTransferDTO_returns_expected_values() {
         BigDecimal amount = new BigDecimal("100.50");
@@ -116,7 +139,6 @@ public class JdbcTransferDaoTest extends BaseDaoTests {
         Assert.assertEquals(createdDTO.getStatus(), mappedDTO.getStatus());
     }
 
-    //fix--find
     @Test
     public void mapTransferDTOToTransfer_has_expected_values() {
         BigDecimal amount = new BigDecimal("200");
@@ -135,7 +157,6 @@ public class JdbcTransferDaoTest extends BaseDaoTests {
         Assert.assertEquals(createdTransfer.isPending(), mappedTransfer.isPending());
     }
 
-    //fix--find error
     @Test
     public void testMapTransferDTOToTransfer_has_expected_values_with_id_param() {
         BigDecimal amount = new BigDecimal("0.50");
@@ -156,7 +177,6 @@ public class JdbcTransferDaoTest extends BaseDaoTests {
         Assert.assertEquals(createdTransfer.isPending(), mappedTransfer.isPending());
     }
 
-    //fix-find error
     @Test
     public void getPrimaryAccountIDFromUsername_retrieves_correct_id() {
         int createdId = 2001;
@@ -168,7 +188,6 @@ public class JdbcTransferDaoTest extends BaseDaoTests {
         Assert.assertEquals(createdId2, retrievedId2);
     }
 
-    //fix--find error
     @Test
     public void updateStatus_updates_status_to_approved() {
         Transfer testTransfer = sut.getTransferById(3002);
@@ -179,5 +198,12 @@ public class JdbcTransferDaoTest extends BaseDaoTests {
         Transfer updatedTransfer = sut.getTransferById(testTransfer.getTransferId());
         boolean isPendingTest = updatedTransfer.isPending();
         Assert.assertFalse(isPendingTest);
+    }
+
+    public void assertTransfersMatch(Transfer expected, Transfer actual) {
+        Assert.assertEquals(expected.getAccountIdSending(), actual.getAccountIdSending());
+        Assert.assertEquals(expected.getAccountIdReceiving(), actual.getAccountIdReceiving());
+        Assert.assertEquals(expected.getAmount(), actual.getAmount());
+        Assert.assertEquals(expected.isPending(), actual.isPending());
     }
 }
