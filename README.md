@@ -49,8 +49,8 @@ Validate all of the API's endpoints using Postman.  *No sensitive information (i
 10. As an authenticated user of the system, I need to be able to either approve or reject a Request Transfer.
    8. I can't "approve" a given Request Transfer  for more TE Bucks than I have in my account.
    9. The Request Transfer status is *Approved* if I approve, or *Rejected* if I reject the request.
-   10. If the transfer is approved, the requester's account balance is increased by the amount of the request.
-   11. If the transfer is approved, the requestee's account balance is decreased by the amount of the request.
+   10. **[COMPLETE]** If the transfer is approved, the requester's account balance is increased by the amount of the request.
+   11. **[COMPLETE]** If the transfer is approved, the requestee's account balance is decreased by the amount of the request.
    12. If the transfer is rejected, no account balance changes.
    13. **[COMPLETE]** A single TEnmo user may choose to have multiple accounts associated with them (this will make the database relationship a one-to many relationship).
 
