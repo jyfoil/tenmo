@@ -138,13 +138,13 @@ public class JdbcTransferDao implements TransferDao{
 
     //rejects a transfer as the sender and deletes transaction from records
     @Override
-    public boolean rejectTransferRequest(int id) {
-        boolean deleted = false;
+    public String rejectTransferRequest(int id) {
+        String status = "";
         String sql = "DELETE FROM transfer WHERE transfer_id = ?";
         try {
             int numberOfDeletedRows = jdbcTemplate.update(sql, id);
             if (numberOfDeletedRows != 0){
-                deleted = true;
+                status = "Deleted";
             }
         } catch (CannotGetJdbcConnectionException e) {
             throw new DaoException("Cannot connect to database", e);
@@ -153,7 +153,7 @@ public class JdbcTransferDao implements TransferDao{
         } catch (DataIntegrityViolationException e) {
             throw new DaoException("Data Integrity violation", e);
         }
-        return deleted;
+        return status;
     }
 
     private Transfer mapRowToTransfer(SqlRowSet rowSet){
@@ -219,6 +219,7 @@ public class JdbcTransferDao implements TransferDao{
         try {
             int numberOfRows = jdbcTemplate.update(sql, transfer.getTransferId());
             if (numberOfRows > 0){
+                transfer.setPending(false);
                 updated = true;
             } else {
                 throw new DaoException("Transfer status not updated");

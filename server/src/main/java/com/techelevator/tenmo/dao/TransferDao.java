@@ -13,7 +13,7 @@ public interface TransferDao {
     public List<Transfer> getPendingTransfersByAccount(int userId);
     public Transfer createTransfer(Transfer transfer);
     public boolean approveTransferRequest(Transfer transfer);
-    public boolean rejectTransferRequest(int transferId);
+    public String rejectTransferRequest(int transferId);
     public TransferDTO mapTransferToTransferDTO(Transfer transfer);
     public Transfer mapTransferDTOToTransfer(TransferDTO transferDTO);
     public Transfer mapTransferDTOToTransfer(TransferDTO transferDTO, int id);

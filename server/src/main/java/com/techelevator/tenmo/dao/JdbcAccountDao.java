@@ -27,7 +27,7 @@ public class JdbcAccountDao implements AccountDao {
     public List<Account> getAccounts(int id) {
         List<Account> accounts = new ArrayList<>();
 
-        String sql = "SELECT account_id, user_id, balance " +
+        String sql = "SELECT account_id, user_id, balance, primary_account " +
                      "FROM account " +
                      "WHERE user_id = ?;";
 
