@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class JdbcTransferDao implements TransferDao{
+public class JdbcTransferDao implements TransferDao {
 
     private JdbcTemplate jdbcTemplate;
     private UserDao userDao;
@@ -25,10 +25,9 @@ public class JdbcTransferDao implements TransferDao{
         this.userDao = userDao;
     }
 
-//    Creates and completes a transfer as the sender
     @Override
     public Transfer sendTransfer(Transfer transfer) {
-       Transfer sentTransfer = createTransfer(transfer);
+        Transfer sentTransfer = createTransfer(transfer);
         if (approveTransferRequest(sentTransfer)) {
             updateStatus(sentTransfer);
             return sentTransfer;
@@ -37,7 +36,6 @@ public class JdbcTransferDao implements TransferDao{
         }
     }
 
-    //gets all accounts the logged in user has and their balances
     @Override
     public List<Transfer> getTransfersByUser(int id) {
         List<Transfer> transfers = new ArrayList<>();
@@ -57,7 +55,6 @@ public class JdbcTransferDao implements TransferDao{
         return transfers;
     }
 
-    //returns a specific transfer by its id
     @Override
     public Transfer getTransferById(int id) {
         Transfer transfer = null;
@@ -76,7 +73,6 @@ public class JdbcTransferDao implements TransferDao{
         return transfer;
     }
 
-    //gets all pending transfers that a logged in user has
     @Override
     public List<Transfer> getPendingTransfersByAccount(int id) {
         List<Transfer> transfers = new ArrayList<>();
@@ -96,27 +92,26 @@ public class JdbcTransferDao implements TransferDao{
         return transfers;
     }
 
-    //initiates a transfer from the recipient/requester
     @Override
     public Transfer createTransfer(Transfer transfer) {
         Transfer requestedTransfer = null;
         String sql = "INSERT INTO transfer (account_id_send, account_id_receive, amount, pending) " +
-                    "VALUES (?, ?, ?, ?) RETURNING transfer_id";
+                "VALUES (?, ?, ?, ?) RETURNING transfer_id";
         try {
-            Integer newTransferId = jdbcTemplate.queryForObject(sql, Integer.class, transfer.getAccountIdSending(), transfer.getAccountIdReceiving(),
+            Integer newTransferId = jdbcTemplate.queryForObject(sql, Integer.class, transfer.getAccountIdSending(),
+                    transfer.getAccountIdReceiving(),
                     transfer.getAmount(), transfer.isPending());
             requestedTransfer = getTransferById(newTransferId);
         } catch (CannotGetJdbcConnectionException e) {
             throw new DaoException("Cannot connect to database", e);
         } catch (BadSqlGrammarException e) {
             throw new DaoException("Sql Syntax error", e);
-         } catch (DataIntegrityViolationException e) {
-         throw new DaoException("Data Integrity violation", e);
+        } catch (DataIntegrityViolationException e) {
+            throw new DaoException("Data Integrity violation", e);
         }
         return requestedTransfer;
     }
 
-    //approves a transfer as the sender and carries out transaction
     @Override
     public boolean approveTransferRequest(Transfer transfer) {
         boolean approved = false;
@@ -133,17 +128,17 @@ public class JdbcTransferDao implements TransferDao{
         } catch (DataIntegrityViolationException e) {
             throw new DaoException("Data Integrity violation", e);
         }
-       return approved;
+        return approved;
     }
 
-    //rejects a transfer as the sender and deletes transaction from records
+
     @Override
     public String rejectTransferRequest(int id) {
         String status = "";
         String sql = "DELETE FROM transfer WHERE transfer_id = ?";
         try {
             int numberOfDeletedRows = jdbcTemplate.update(sql, id);
-            if (numberOfDeletedRows != 0){
+            if (numberOfDeletedRows != 0) {
                 status = "Rejected";
             }
         } catch (CannotGetJdbcConnectionException e) {
@@ -156,7 +151,7 @@ public class JdbcTransferDao implements TransferDao{
         return status;
     }
 
-    private Transfer mapRowToTransfer(SqlRowSet rowSet){
+    private Transfer mapRowToTransfer(SqlRowSet rowSet) {
         Transfer transfer = new Transfer();
         transfer.setTransferId(rowSet.getInt("transfer_id"));
         transfer.setAccountIdSending(rowSet.getInt("account_id_send"));
@@ -187,6 +182,7 @@ public class JdbcTransferDao implements TransferDao{
         return transfer;
     }
 
+    @Override
     public Transfer mapTransferDTOToTransfer(TransferDTO transferDTO, int id) {
         Transfer transfer = new Transfer();
         transfer.setTransferId(id);
@@ -197,14 +193,15 @@ public class JdbcTransferDao implements TransferDao{
         return transfer;
     }
 
-    public int getPrimaryAccountIDFromUsername(String username){
+    @Override
+    public int getPrimaryAccountIDFromUsername(String username) {
         int accountId = 0;
         String sql = "SELECT account_id FROM account WHERE primary_account = true AND user_id = ?";
         try {
-        SqlRowSet result = jdbcTemplate.queryForRowSet(sql, userDao.findIdByUsername(username));
-        if (result.next()){
-            accountId = result.getInt("account_id");
-        }
+            SqlRowSet result = jdbcTemplate.queryForRowSet(sql, userDao.findIdByUsername(username));
+            if (result.next()) {
+                accountId = result.getInt("account_id");
+            }
         } catch (CannotGetJdbcConnectionException e) {
             throw new DaoException("Cannot connect to database", e);
         } catch (BadSqlGrammarException e) {
@@ -213,13 +210,13 @@ public class JdbcTransferDao implements TransferDao{
         return accountId;
     }
 
-    //changed to public since transferController needs it
-    public boolean updateStatus(Transfer transfer){
+    @Override
+    public boolean updateStatus(Transfer transfer) {
         boolean updated = false;
         String sql = "UPDATE transfer SET pending = false WHERE transfer_id = ?";
         try {
             int numberOfRows = jdbcTemplate.update(sql, transfer.getTransferId());
-            if (numberOfRows > 0){
+            if (numberOfRows > 0) {
                 transfer.setPending(false);
                 updated = true;
             } else {

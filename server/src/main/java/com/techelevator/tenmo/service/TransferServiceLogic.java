@@ -123,7 +123,7 @@ public class TransferServiceLogic implements TransferService {
         return transferDao.mapTransferToTransferDTO(transfer);
     }
 
-    //TODO: Find a way to show the user their transfer id so they know what to delete/approve
+    @Override
     public String rejectTransfer(Principal principal, int id) {
         Transfer transfer = transferDao.getTransferById(id);
         if (principal.getName().equals(userDao.getUsernameByAccountId(transfer.getAccountIdSending()))

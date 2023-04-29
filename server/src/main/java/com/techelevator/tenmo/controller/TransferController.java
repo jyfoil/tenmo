@@ -35,37 +35,31 @@ public class TransferController {
         this.transferService = transferService;
     }
 
-    //README 5.i and 8.i
     @RequestMapping(path = "/all", method = RequestMethod.GET)
     public List<UserInfoDTO> findAll() {
         return transferService.findAll();
     }
 
-    //README 7
     @RequestMapping(path = "/transfer/{id}", method = RequestMethod.GET)
     public TransferDTO getTransferById(@PathVariable int id) {
         return transferService.getTransferById(id);
     }
 
-    //README 6
     @RequestMapping(path = "/transfer/all", method = RequestMethod.GET)
     public List<TransferDTO> getTransfersByAccount(Principal principal) {
         return transferService.getTransfersByAccount(principal);
     }
 
-    //README 9
     @RequestMapping(path = "/transfer/pending", method = RequestMethod.GET)
     public List<TransferDTO> getPendingTransfersByAccount(Principal principal) {
         return transferService.getPendingTransfersByAccount(principal);
     }
 
-    //README 5
     @RequestMapping(path = "/transfer/send", method = RequestMethod.POST)
     public TransferDTO sendTransfer(Principal principal, @RequestBody TransferDTO sendDTO) {
         return transferService.sendTransfer(principal, sendDTO);
     }
 
-    //README 8
     @RequestMapping(path = "/transfer/request", method = RequestMethod.POST)
     public TransferDTO requestTransfer(Principal principal, @RequestBody TransferDTO requestDTO) {
         return transferService.requestTransfer(principal, requestDTO);

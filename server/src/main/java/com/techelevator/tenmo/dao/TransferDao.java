@@ -18,4 +18,5 @@ public interface TransferDao {
     public Transfer mapTransferDTOToTransfer(TransferDTO transferDTO);
     public Transfer mapTransferDTOToTransfer(TransferDTO transferDTO, int id);
     public boolean updateStatus(Transfer transfer);
+    public int getPrimaryAccountIDFromUsername(String username);
 }

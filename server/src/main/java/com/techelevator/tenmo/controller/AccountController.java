@@ -22,20 +22,19 @@ public class AccountController {
     private UserDao userDao;
     private AccountService accountService;
 
-    public AccountController(AccountDao accountDao, TransferDao transferDao, UserDao userDao, AccountService accountService) {
+    public AccountController(AccountDao accountDao, TransferDao transferDao, UserDao userDao,
+                             AccountService accountService) {
         this.accountDao = accountDao;
         this.transferDao = transferDao;
         this.userDao = userDao;
         this.accountService = accountService;
     }
 
-    //README 4
     @RequestMapping(path = "/account/all", method = RequestMethod.GET)
     public List<Account> getAccounts(Principal principal) {
-       return  accountService.getAccounts(principal);
+        return accountService.getAccounts(principal);
     }
 
-    //README 3 and 16
     @RequestMapping(path = "/account", method = RequestMethod.POST)
     public Account createAccount(Principal principal, @RequestBody Account account) {
         return accountService.createAccount(principal, account);

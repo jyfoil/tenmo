@@ -24,11 +24,13 @@ public class AccountServiceLogic implements AccountService {
         this.userDao = userDao;
     }
 
+    @Override
     public List<Account> getAccounts(Principal principal) {
         int idFromUsername = userDao.findIdByUsername(principal.getName());
         return accountDao.getAccounts(idFromUsername);
     }
 
+    @Override
     public Account createAccount(Principal principal, Account account) {
         // We want to get the username that's associated with this account
         if (!principal.getName().equals(userDao.findUsernameById(account.getUserId()))) {
