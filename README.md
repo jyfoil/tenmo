@@ -13,12 +13,12 @@ You should attempt to complete all of the following required use cases.
 1. **[COMPLETE]** As a user of the system, I need to be able to register myself with a username and password.
    1. The ability to register has been provided in your starter code.
 2. **[COMPLETE]** As a user of the system, I need to be able to log in using my registered username and password.
-   1. Logging in returns an Authentication Token. I need to include this token with all my subsequent interactions with the system outside of registering and logging in.
-   2. The ability to log in has been provided in your starter code.
-   3. User ids start at 1001.
+   1. **[COMPLETE]** Logging in returns an Authentication Token. I need to include this token with all my subsequent interactions with the system outside of registering and logging in.
+   2.  **[COMPLETE]** The ability to log in has been provided in your starter code.
+   3. **[COMPLETE]** User ids start at 1001.
 3. **[COMPLETE]** As a user, when I register a new account is created for me.
-   1. The new account has an initial balance of $1000.
-   2. Account ids start at 2001.
+   1. **[COMPLETE]** The new account has an initial balance of $1000.
+   2. **[COMPLETE]** Account ids start at 2001.
 4. **[COMPLETE]** As an authenticated user of the system, I need to be able to see my Account Balance.
 5. **[COMPLETE]** As an authenticated user of the system, I need to be able to *send* a transfer of a specific amount of TE Bucks to a registered user. 
    1. **[COMPLETE]** I should be able to choose from a list of users to send TE Bucks to. 

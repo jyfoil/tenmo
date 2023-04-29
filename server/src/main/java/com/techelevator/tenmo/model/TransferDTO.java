@@ -17,6 +17,13 @@ public class TransferDTO {
 
     }
 
+    public TransferDTO(String userSending, String userReceiving, BigDecimal amount, String status) {
+        this.userSending = userSending;
+        this.userReceiving = userReceiving;
+        this.amount = amount;
+        this.status = status;
+    }
+
     public TransferDTO(String userSending, String userReceiving, BigDecimal amount) {
         this.userSending = userSending;
         this.userReceiving = userReceiving;

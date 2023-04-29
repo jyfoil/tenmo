@@ -7,6 +7,7 @@ import com.techelevator.tenmo.model.Transfer;
 import com.techelevator.tenmo.model.TransferDTO;
 import com.techelevator.tenmo.model.User;
 import com.techelevator.tenmo.model.UserInfoDTO;
+import com.techelevator.tenmo.service.TransferService;
 import exceptions.DaoException;
 import exceptions.TransferException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,83 +25,59 @@ public class TransferController {
     private AccountDao accountDao;
     private TransferDao transferDao;
     private UserDao userDao;
+    private TransferService transferService;
 
-    public TransferController(AccountDao accountDao, TransferDao transferDao, UserDao userDao) {
+    public TransferController(AccountDao accountDao, TransferDao transferDao,
+                              UserDao userDao, TransferService transferService) {
         this.accountDao = accountDao;
         this.transferDao = transferDao;
         this.userDao = userDao;
+        this.transferService = transferService;
     }
 
     //README 5.i and 8.i
     @RequestMapping(path = "/all", method = RequestMethod.GET)
-    public List<UserInfoDTO> findAll(){
-        List<UserInfoDTO> userinfo = new ArrayList<>();
-        List<User> users = userDao.findAll();
-        for (User eachUser : users){
-            userinfo.add(userDao.mapUserToUserInfoDTO(eachUser));
-        }
-        return userinfo;
+    public List<UserInfoDTO> findAll() {
+        return transferService.findAll();
     }
 
     //README 7
     @RequestMapping(path = "/transfer/{id}", method = RequestMethod.GET)
     public TransferDTO getTransferById(@PathVariable int id) {
-        Transfer transfer = transferDao.getTransferById(id);
-        TransferDTO transferRequest = new TransferDTO();
-        transferRequest = transferDao.mapTransferToTransferDTO(transfer);
-        return transferRequest;
+        return transferService.getTransferById(id);
     }
 
     //README 6
     @RequestMapping(path = "/transfer/all", method = RequestMethod.GET)
     public List<TransferDTO> getTransfersByAccount(Principal principal) {
-        int idFromUsername = userDao.findIdByUsername(principal.getName());
-        List<Transfer> transfers = transferDao.getTransfersByUser(idFromUsername);
-        List<TransferDTO> transferRequests = new ArrayList<>();
-        for (Transfer eachTransfer : transfers) {
-            transferRequests.add(transferDao.mapTransferToTransferDTO(eachTransfer));
-        }
-        return transferRequests;
+        return transferService.getTransfersByAccount(principal);
     }
 
     //README 9
     @RequestMapping(path = "/transfer/pending", method = RequestMethod.GET)
     public List<Transfer> getPendingTransfersByAccount(Principal principal) {
-        int idFromUsername = userDao.findIdByUsername(principal.getName());
-        return transferDao.getPendingTransfersByAccount(idFromUsername);
+        return transferService.getPendingTransfersByAccount(principal);
     }
 
     //README 5
     @RequestMapping(path = "/transfer/send", method = RequestMethod.POST)
-    public Transfer sendTransfer(Principal principal, @RequestBody TransferDTO sendDTO){
-        if (!sendDTO.getUserSending().equals(principal.getName())){
-           throw new TransferException("Hey, you can't send money on behalf of someone else!");
-        }
-        Transfer transfer = transferDao.mapTransferDTOToTransfer(sendDTO);
-        return transferDao.sendTransfer(transfer);
+    public TransferDTO sendTransfer(Principal principal, @RequestBody TransferDTO sendDTO) {
+        return transferService.sendTransfer(principal, sendDTO);
     }
 
     //README 8
     @RequestMapping(path = "/transfer/request", method = RequestMethod.POST)
-    public Transfer requestTransfer(Principal principal, @RequestBody TransferDTO requestDTO){
-        if (!requestDTO.getUserReceiving().equals(principal.getName())){
-            throw new TransferException("Hey, you can't do that!");
-        }
-        Transfer transfer = transferDao.mapTransferDTOToTransfer(requestDTO);
-        return transferDao.createTransfer(transfer);
+    public TransferDTO requestTransfer(Principal principal, @RequestBody TransferDTO requestDTO) {
+        return transferService.requestTransfer(principal, requestDTO);
     }
 
-    //NEW SINCE COMMIT
     @RequestMapping(path = "/transfer/{id}", method = RequestMethod.PUT)
-    public TransferDTO approveTransfer(Principal principal, @PathVariable int id){
-        if (!getTransferById(id).getUserSending().equals(principal.getName())){
-            throw new TransferException("Cannot approve transfer on behalf of another user");
-        }
-        Transfer transfer = transferDao.mapTransferDTOToTransfer(getTransferById(id), id);
-        if (!transferDao.approveTransferRequest(transfer)){
-            throw new TransferException("Transfer was not approved");
-        }
-        transferDao.updateStatus(transfer);
-        return transferDao.mapTransferToTransferDTO(transfer);
+    public TransferDTO approveTransfer(Principal principal, @PathVariable int id) {
+        return transferService.approveTransfer(principal, id);
+    }
+
+    @RequestMapping(path = "/transfer/{id}", method = RequestMethod.DELETE)
+    public String rejectTransfer(Principal principal, @PathVariable int id) {
+        return transferService.rejectTransfer(principal, id);
     }
 }
