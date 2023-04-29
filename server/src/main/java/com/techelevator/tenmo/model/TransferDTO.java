@@ -12,9 +12,18 @@ public class TransferDTO {
     private String userReceiving;
     private BigDecimal amount;
     private String status;
+    private int transferId;
 
     public TransferDTO() {
 
+    }
+
+    public TransferDTO(String userSending, String userReceiving, BigDecimal amount, String status, int transferId) {
+        this.userSending = userSending;
+        this.userReceiving = userReceiving;
+        this.amount = amount;
+        this.status = status;
+        this.transferId = transferId;
     }
 
     public TransferDTO(String userSending, String userReceiving, BigDecimal amount, String status) {
@@ -61,5 +70,13 @@ public class TransferDTO {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public int getTransferId() {
+        return transferId;
+    }
+
+    public void setTransferId(int transferId) {
+        this.transferId = transferId;
     }
 }

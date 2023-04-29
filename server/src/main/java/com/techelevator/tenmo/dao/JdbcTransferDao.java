@@ -144,7 +144,7 @@ public class JdbcTransferDao implements TransferDao{
         try {
             int numberOfDeletedRows = jdbcTemplate.update(sql, id);
             if (numberOfDeletedRows != 0){
-                status = "Deleted";
+                status = "Rejected";
             }
         } catch (CannotGetJdbcConnectionException e) {
             throw new DaoException("Cannot connect to database", e);
@@ -172,6 +172,7 @@ public class JdbcTransferDao implements TransferDao{
         transferDTO.setAmount(transfer.getAmount());
         transferDTO.setUserSending(userDao.getUsernameByAccountId(transfer.getAccountIdSending()));
         transferDTO.setUserReceiving(userDao.getUsernameByAccountId(transfer.getAccountIdReceiving()));
+        transferDTO.setTransferId(transfer.getTransferId());
         transferDTO.setStatus(transfer.isPending() ? "Pending" : "Approved");
         return transferDTO;
     }

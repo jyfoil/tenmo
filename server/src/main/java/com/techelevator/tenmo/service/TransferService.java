@@ -11,7 +11,7 @@ public interface TransferService {
     List<UserInfoDTO> findAll();
     TransferDTO getTransferById(int id);
     List<TransferDTO> getTransfersByAccount(Principal principal);
-    List<Transfer> getPendingTransfersByAccount(Principal principal);
+    List<TransferDTO> getPendingTransfersByAccount(Principal principal);
     TransferDTO sendTransfer(Principal principal, TransferDTO sendDTO);
     TransferDTO requestTransfer(Principal principal, TransferDTO requestDTO);
     TransferDTO approveTransfer(Principal principal, int id);

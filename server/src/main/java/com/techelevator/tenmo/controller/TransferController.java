@@ -55,7 +55,7 @@ public class TransferController {
 
     //README 9
     @RequestMapping(path = "/transfer/pending", method = RequestMethod.GET)
-    public List<Transfer> getPendingTransfersByAccount(Principal principal) {
+    public List<TransferDTO> getPendingTransfersByAccount(Principal principal) {
         return transferService.getPendingTransfersByAccount(principal);
     }
 

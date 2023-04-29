@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.math.BigDecimal;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,13 +60,28 @@ public class TransferServiceLogic implements TransferService {
     }
 
     @Override
-    public List<Transfer> getPendingTransfersByAccount(Principal principal) {
+    public List<TransferDTO> getPendingTransfersByAccount(Principal principal) {
         int idFromUsername = userDao.findIdByUsername(principal.getName());
-        return transferDao.getPendingTransfersByAccount(idFromUsername);
+        List<Transfer> transfers = transferDao.getPendingTransfersByAccount(idFromUsername);
+        List<TransferDTO> transferDTOs = new ArrayList<>();
+        for (Transfer eachTransfer : transfers){
+            transferDTOs.add(transferDao.mapTransferToTransferDTO(eachTransfer));
+        }
+        return transferDTOs;
     }
 
     @Override
     public TransferDTO sendTransfer(Principal principal, TransferDTO sendDTO) {
+        if (sendDTO.getUserSending().equals(sendDTO.getUserReceiving())){
+            throw new TransferException("Cannot send to the same user");
+        }
+        BigDecimal amountInSenderAccount = accountDao.getPrimaryAccountBalanceByUsername(sendDTO.getUserSending());
+        if (sendDTO.getAmount().compareTo(amountInSenderAccount) == 1){
+            throw new TransferException("Cannot send more money than primary account balance");
+        }
+        if (sendDTO.getAmount().compareTo(BigDecimal.ZERO) <= 0){
+            throw new TransferException("Cannot send amounts that are zero or lower");
+        }
         if (!sendDTO.getUserSending().equals(principal.getName())) {
             throw new TransferException("Hey, you can't send money on behalf of someone else!");
         }
@@ -76,6 +92,12 @@ public class TransferServiceLogic implements TransferService {
 
     @Override
     public TransferDTO requestTransfer(Principal principal, TransferDTO requestDTO) {
+        if (requestDTO.getUserReceiving().equals(requestDTO.getUserSending())){
+            throw new TransferException("Cannot request money from own account");
+        }
+        if (requestDTO.getAmount().compareTo(BigDecimal.ZERO) <= 0){
+            throw new TransferException("Cannot request amounts that are zero or lower");
+        }
         if (!requestDTO.getUserReceiving().equals(principal.getName())) {
             throw new TransferException("Hey, you can't do that!");
         }
@@ -86,6 +108,10 @@ public class TransferServiceLogic implements TransferService {
 
     @Override
     public TransferDTO approveTransfer(Principal principal, int id) {
+        BigDecimal amountInSenderAccount = accountDao.getPrimaryAccountBalanceByUsername(principal.getName());
+        if (transferDao.getTransferById(id).getAmount().compareTo(amountInSenderAccount) == 1){
+            throw new TransferException("Cannot approve transfer larger than primary account balance");
+        }
         if (!getTransferById(id).getUserSending().equals(principal.getName())) {
             throw new TransferException("Cannot approve transfer on behalf of another user");
         }

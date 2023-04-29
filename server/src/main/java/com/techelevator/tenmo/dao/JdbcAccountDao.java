@@ -11,6 +11,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -94,6 +95,17 @@ public class JdbcAccountDao implements AccountDao {
 
 
         return createdAccount;
+    }
+
+    public BigDecimal getPrimaryAccountBalanceByUsername(String username){
+        BigDecimal balance = null;
+        String sql = "SELECT balance FROM account WHERE user_id = (SELECT user_id FROM tenmo_user WHERE username = ?) " +
+                "AND primary_account = true";
+        SqlRowSet result = jdbcTemplate.queryForRowSet(sql, username);
+        if (result.next()){
+            balance = result.getBigDecimal("balance");
+        }
+        return balance;
     }
 
 

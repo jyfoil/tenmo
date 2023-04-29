@@ -22,12 +22,12 @@ You should attempt to complete all of the following required use cases.
 4. **[COMPLETE]** As an authenticated user of the system, I need to be able to see my Account Balance.
 5. **[COMPLETE]** As an authenticated user of the system, I need to be able to *send* a transfer of a specific amount of TE Bucks to a registered user. 
    1. **[COMPLETE]** I should be able to choose from a list of users to send TE Bucks to. 
-   2. I must not be allowed to send money to myself.
+   2. **[COMPLETE]** I must not be allowed to send money to myself.
    3. **[COMPLETE]** A transfer includes the usernames of the from and to users and the amount of TE Bucks.
    4. **[COMPLETE]** The receiver's account balance is increased by the amount of the transfer.
    5. **[COMPLETE]** The sender's account balance is decreased by the amount of the transfer.
-   6. I can't send more TE Bucks than I have in my account.
-   7. I can't send a zero or negative amount.
+   6. **[COMPLETE]** I can't send more TE Bucks than I have in my account.
+   7. **[COMPLETE]** I can't send a zero or negative amount.
    8. **[COMPLETE]** A Sending Transfer has an initial status of *Approved*.
    9. **[COMPLETE]** Transfer ids start at 3001.
 6. **[COMPLETE]** As an authenticated user of the system, I need to be able to see transfers I have sent or received.
@@ -39,19 +39,19 @@ Validate all of the API's endpoints using Postman.  *No sensitive information (i
 
 8. **[COMPLETE]** As an authenticated user of the system, I need to be able to *request* a transfer of a specific amount of TE Bucks from another registered user.
    1. **[COMPLETE]** I should be able to choose from a list of users to request TE Bucks from.
-   2. I must not be allowed to request money from myself.
-   3. I can't request a zero or negative amount.
+   2. **[COMPLETE]** I must not be allowed to request money from myself.
+   3. **[COMPLETE]** I can't request a zero or negative amount.
    4. **[COMPLETE]** A transfer includes the usernames of the from and to users and the amount of TE Bucks.
    5. **[COMPLETE]** A Request Transfer has an initial status of *Pending*.
    6. **[COMPLETE]** No account balance changes until the request is approved.
-   7. The transfer request should appear in both users' list of transfers (use case #5).
+   7. **[COMPLETE]** The transfer request should appear in both users' list of transfers (use case #5).
 9.  **[COMPLETE]** As an authenticated user of the system, I need to be able to see my *Pending* transfers.
-10. As an authenticated user of the system, I need to be able to either approve or reject a Request Transfer.
-   8. I can't "approve" a given Request Transfer  for more TE Bucks than I have in my account.
-   9. The Request Transfer status is *Approved* if I approve, or *Rejected* if I reject the request.
+10. **[COMPLETE]**  As an authenticated user of the system, I need to be able to either approve or reject a Request Transfer.
+   8. **[COMPLETE]**  I can't "approve" a given Request Transfer  for more TE Bucks than I have in my account.
+   9. **[COMPLETE]** The Request Transfer status is *Approved* if I approve, or *Rejected* if I reject the request.
    10. **[COMPLETE]** If the transfer is approved, the requester's account balance is increased by the amount of the request.
    11. **[COMPLETE]** If the transfer is approved, the requestee's account balance is decreased by the amount of the request.
-   12. If the transfer is rejected, no account balance changes.
+   12. **[COMPLETE]** If the transfer is rejected, no account balance changes.
    13. **[COMPLETE]** A single TEnmo user may choose to have multiple accounts associated with them (this will make the database relationship a one-to many relationship).
 
 ### Bonus Challenge
